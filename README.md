@@ -5,6 +5,15 @@
 
 [FolderssPLuginTemplate](https://github.com/zaruous/FolderssPLuginTemplate)을 바탕으로 만들었습니다.
 
+![AutoClick 화면 (어두운 테마)](docs/screenshot/autoclick-dark.png)
+
+| 밝은 테마 | 예약 대기 중 |
+|---|---|
+| ![AutoClick 화면 (밝은 테마)](docs/screenshot/autoclick-light.png) | ![예약 대기 중인 AutoClick](docs/screenshot/autoclick-scheduled.png) |
+
+- 색은 Folderss의 현재 테마를 따릅니다(위: Black, 아래 왼쪽: Light).
+- 예약 대기 중에는 설정이 잠기고, 상태 줄에 시작까지 남은 시간이 나옵니다. 버튼은 [예약 취소]로 바뀝니다.
+
 ```
 빌드 결과: src/AutoClick/bin/Debug/net8.0-windows/AutoClick.zip
 ├── plugin.json     ← id: zaruous.folderss-autoclick, 메뉴 이름: AutoClick
@@ -93,6 +102,7 @@ dotnet build
 .
 ├── FolderssAutoClick.sln
 ├── .github/workflows/build.yml      ← main 푸시·PR 빌드, v* 태그에 GitHub 릴리스
+├── docs/screenshot/                 ← README 스크린샷
 ├── src/AutoClick/
 │   ├── AutoClick.csproj             ← 빌드하면 zip까지 만든다 (PackPlugin 타깃)
 │   ├── plugin.json

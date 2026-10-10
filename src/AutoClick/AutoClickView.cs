@@ -170,6 +170,7 @@ namespace AutoClick
             _pointsTitle = Hint("");
             _pointsTitle.Margin = new Thickness(0, 4, 0, 4);
             _points = new ListBox { Height = 88, SelectionMode = SelectionMode.Extended };
+            _points.Loaded += (s, e) => ThemeListBox(_points);
             var buttons = Row(Btn("선택 삭제", RemoveSelectedPoints), Btn("모두 지우기", ClearPoints));
             buttons.HorizontalAlignment = HorizontalAlignment.Right;
             var smartPanel = new DockPanel();
@@ -211,6 +212,19 @@ namespace AutoClick
             root.Children.Add(bar);
             root.Children.Add(settingsArea);
             return root;
+        }
+
+        /// <summary>
+        /// WPF 기본 ListBox 템플릿은 잠기면(실행 중 설정 영역을 막을 때) 바탕을 흰색으로 바꾼다.
+        /// Folderss 테마는 색만 정하고 템플릿은 그대로 쓰므로, 바탕·테두리를 테마 색에 고정한다.
+        /// </summary>
+        private static void ThemeListBox(ListBox list)
+        {
+            var border = list.Template.FindName("Bd", list) as Border;
+            if (border == null)
+                return;
+            border.SetResourceReference(Border.BackgroundProperty, "PanelBackground");
+            border.SetResourceReference(Border.BorderBrushProperty, "BorderBrush");
         }
 
         private static Border Section(string title, UIElement content)
@@ -443,6 +457,10 @@ namespace AutoClick
                 box.SetResourceReference(Control.ForegroundProperty, "PrimaryText");
                 box.SetResourceReference(TextBoxBase.CaretBrushProperty, "PrimaryText");
                 box.BorderBrush = Brushes.Transparent;
+                // 잠기면(실행 중) 반투명 흰 막을 덮는 부분. 어두운 테마에서 밝게 튀므로 쓰지 않는다
+                var disabledVisual = picker.Template.FindName("PART_DisabledVisual", picker) as UIElement;
+                if (disabledVisual != null)
+                    disabledVisual.Visibility = Visibility.Collapsed;
                 box.ApplyTemplate();
                 // 기본 템플릿 안쪽의 흰 1px 테두리 두 개
                 foreach (var name in new[] { "ContentElement", "watermark_decorator" })
@@ -722,9 +740,9 @@ namespace AutoClick
             string text;
             if (!clicking)
             {
+                // 취소 방법은 버튼("예약 취소 (F3)")에 나오므로 상태 줄에는 쓰지 않는다(창 너비에 맞춤)
                 text = "예약 대기 — " + Stamp(job.StartAt.Value) + "에 시작 (" + FormatDuration(job.StartAt.Value - DateTime.Now) + " 남음)"
-                    + (job.StopAt.HasValue ? ", " + Stamp(job.StopAt.Value) + "까지" : "")
-                    + " · " + hotkey + "[예약 취소]로 취소";
+                    + (job.StopAt.HasValue ? " · " + Stamp(job.StopAt.Value) + "까지" : "");
             }
             else if (job.StopAt.HasValue)
             {

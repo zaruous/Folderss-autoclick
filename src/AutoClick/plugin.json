@@ -1,0 +1,9 @@
+{
+  "id": "zaruous.folderss-autoclick",
+  "name": "AutoClick",
+  "version": "1.0.0",
+  "description": "마우스 자동 클릭 (간격·횟수, 예약 시작·종료 시각, 위치 기록 순환 클릭, 전역 단축키)",
+  "assembly": "AutoClick.dll",
+  "type": "AutoClick.AutoClickPlugin",
+  "hasSettings": false
+}

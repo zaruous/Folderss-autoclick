@@ -13,6 +13,8 @@
 
 - 색은 Folderss의 현재 테마를 따릅니다(위: Black, 아래 왼쪽: Light).
 - 예약 대기 중에는 설정이 잠기고, 상태 줄에 시작까지 남은 시간이 나옵니다. 버튼은 [예약 취소]로 바뀝니다.
+- AutoClick은 자기 창의 크기·항상 위·숨기기와 창 단위 전역 단축키를 직접 다루므로 `plugin.json`에 `"popupOnly": true`를 선언합니다.
+  Folderss의 플러그인 표시 방식(메인 창 퍼스펙티브)을 지원하는 버전에서도 항상 팝업 창으로 열립니다. 이 키를 모르는 이전 Folderss는 무시합니다.
 
 ```
 빌드 결과: src/AutoClick/bin/Debug/net8.0-windows/AutoClick.zip

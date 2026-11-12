@@ -104,7 +104,7 @@ dotnet build
 ```
 .
 ├── FolderssAutoClick.sln
-├── .github/workflows/build.yml      ← main 푸시·PR 빌드, v* 태그에 GitHub 릴리스
+├── .github/workflows/build.yml      ← main 푸시·PR 빌드, 새 버전이면 main 푸시에서 자동 릴리스, v* 태그에 GitHub 릴리스
 ├── docs/screenshot/                 ← README 스크린샷
 ├── src/AutoClick/
 │   ├── AutoClick.csproj             ← 빌드하면 zip까지 만든다 (PackPlugin 타깃)
@@ -141,13 +141,13 @@ dotnet build
 | 언제 | 하는 일 |
 |---|---|
 | `main` 푸시, PR | 빌드하고 플러그인 zip을 Actions의 **Artifacts**에 올린다 |
+| `main` 푸시 (새 버전) | `plugin.json`의 `version`에 해당하는 `v<version>` 태그가 아직 없으면 그 커밋에 태그를 달고 GitHub 릴리스를 만든다. 태그가 이미 있으면 아무것도 하지 않는다 |
 | `v*` 태그 푸시 | `plugin.json`의 `version`과 태그가 같은지 확인한 뒤 GitHub 릴리스를 만들고 `zaruous.folderss-autoclick-<version>.zip`을 첨부한다 |
 
-```powershell
-# plugin.json의 "version"을 올리고 커밋·푸시한 뒤
-git tag v1.0.0
-git push origin v1.0.0
-```
+릴리스하려면 `plugin.json`의 `"version"`을 올린 커밋을 main에 넣으면 됩니다(PR 머지 포함). 태그를 직접 푸시해도 됩니다.
+
+- main에 들어가는 순간 릴리스가 공개되므로, 버전을 올리는 PR은 확인을 마친 뒤 머지하세요.
+- 버전을 올리지 않은 main 푸시는 빌드만 합니다.
 
 ---
 

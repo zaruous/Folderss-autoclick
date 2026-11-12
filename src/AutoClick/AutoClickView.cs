@@ -115,7 +115,8 @@ namespace AutoClick
         private UIElement BuildContent()
         {
             _button = Combo(new[] { "왼쪽", "오른쪽", "가운데" }, (int)_settings.Button);
-            _clickType = Combo(new[] { "싱글 클릭", "더블 클릭" }, _settings.DoubleClick ? 1 : 0);
+            _clickType = Combo(new[] { "싱글 클릭", "더블 클릭", "이동만 (클릭 안 함)" }, _settings.MoveOnly ? 2 : _settings.DoubleClick ? 1 : 0);
+            _clickType.SelectionChanged += (s, e) => UpdateFreezePointerEnabled();
             var click = Section("클릭", Stack(Labeled("마우스", 48, _button), Labeled("방식", 48, _clickType)));
 
             _counterEnabled = Check("횟수 제한", _settings.CounterEnabled);
@@ -637,7 +638,7 @@ namespace AutoClick
             stopAt = null;
             if (_settings.IntervalMs < 1)
                 return "클릭 간격을 1/1000초 이상으로 정하세요.";
-            if (_settings.SmartClick && _settings.Points.Count == 0)
+            if (!_settings.MoveOnly && _settings.SmartClick && _settings.Points.Count == 0)
                 return "기록한 위치가 없습니다. 클릭할 곳에 마우스를 두고 " + _settings.RecordHotkey + " 키로 기록하세요.";
 
             var now = DateTime.Now;
@@ -675,13 +676,14 @@ namespace AutoClick
                     {
                         Button = _settings.Button,
                         DoubleClick = _settings.DoubleClick,
+                        MoveOnly = _settings.MoveOnly,
                         IntervalMs = _settings.IntervalMs,
                         MaxClicks = _settings.CounterEnabled ? _settings.CounterLimit : 0,
                         FreezePointer = !_settings.SmartClick && _settings.FreezePointer,
                         StartAt = startAt,
                         StopAt = stopAt
                     };
-                    if (_settings.SmartClick)
+                    if (_settings.SmartClick && !_settings.MoveOnly)
                         job.Points = _settings.Points.ToArray();
 
                     _runner = new ClickRunner(job, Dispatcher, Runner_Finished);
@@ -838,7 +840,10 @@ namespace AutoClick
         private void CollectSettings()
         {
             _settings.Button = (MouseButtonKind)Math.Max(0, _button.SelectedIndex);
-            _settings.DoubleClick = _clickType.SelectedIndex == 1;
+            // 이동만을 고르면 더블 클릭 여부는 바꾸지 않는다(다시 클릭 방식으로 돌아올 때 그대로 쓰도록)
+            if (_clickType.SelectedIndex != 2)
+                _settings.DoubleClick = _clickType.SelectedIndex == 1;
+            _settings.MoveOnly = _clickType.SelectedIndex == 2;
             _settings.IntervalMs = ReadInterval();
             _settings.CounterEnabled = _counterEnabled.IsChecked == true;
             _settings.CounterLimit = Math.Max(1, ReadNumber(_counterLimit));
@@ -929,8 +934,12 @@ namespace AutoClick
 
         private void UpdateFreezePointerEnabled()
         {
-            // 위치 기록 클릭은 기록한 위치로 옮겨 다니므로 포인터 고정이 의미 없다
-            _freezePointer.IsEnabled = _smartClick.IsChecked != true;
+            // 위치 기록 클릭은 기록한 위치로 옮겨 다니므로 포인터 고정이 의미 없다.
+            // 이동만이면 클릭하지 않으므로 마우스 버튼·포인터 고정·위치 기록 클릭이 모두 의미 없다.
+            var moveOnly = _clickType.SelectedIndex == 2;
+            _button.IsEnabled = !moveOnly;
+            _smartClick.IsEnabled = !moveOnly;
+            _freezePointer.IsEnabled = !moveOnly && _smartClick.IsChecked != true;
         }
 
         private void ShowClickCount()

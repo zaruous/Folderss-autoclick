@@ -44,6 +44,9 @@ namespace AutoClick
         public MouseButtonKind Button = MouseButtonKind.Left;
         public bool DoubleClick;
 
+        /// <summary>클릭하지 않고 포인터만 1픽셀 움직였다 되돌린다(화면보호기·절전 막기용). DoubleClick보다 우선한다.</summary>
+        public bool MoveOnly;
+
         /// <summary>클릭 사이 간격(ms). 1 이상이어야 시작할 수 있다.</summary>
         public int IntervalMs = 100;
 
@@ -95,6 +98,7 @@ namespace AutoClick
             if (Enum.TryParse(manager.GetSetting("mouseButton"), out button) && Enum.IsDefined(typeof(MouseButtonKind), button))
                 s.Button = button;
             s.DoubleClick = ReadBool(manager, "doubleClick", s.DoubleClick);
+            s.MoveOnly = ReadBool(manager, "moveOnly", s.MoveOnly);
             s.IntervalMs = ReadInt(manager, "intervalMs", s.IntervalMs, 0, int.MaxValue);
             s.CounterEnabled = ReadBool(manager, "counter.enabled", s.CounterEnabled);
             s.CounterLimit = ReadInt(manager, "counter.limit", s.CounterLimit, 1, int.MaxValue);
@@ -120,6 +124,7 @@ namespace AutoClick
             {
                 { "mouseButton", Button.ToString() },
                 { "doubleClick", Format(DoubleClick) },
+                { "moveOnly", Format(MoveOnly) },
                 { "intervalMs", IntervalMs.ToString(CultureInfo.InvariantCulture) },
                 { "counter.enabled", Format(CounterEnabled) },
                 { "counter.limit", CounterLimit.ToString(CultureInfo.InvariantCulture) },

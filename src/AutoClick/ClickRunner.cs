@@ -10,6 +10,10 @@ namespace AutoClick
     {
         public MouseButtonKind Button;
         public bool DoubleClick;
+
+        /// <summary>클릭 대신 포인터를 제자리에서 1픽셀 움직였다 되돌린다. 이때 Points·FreezePointer는 쓰지 않는다.</summary>
+        public bool MoveOnly;
+
         public int IntervalMs;
 
         /// <summary>이만큼 클릭하면 끝낸다. 0이면 멈출 때까지.</summary>
@@ -106,7 +110,7 @@ namespace AutoClick
         private void ClickLoop()
         {
             ScreenPoint? fixedPoint = null;
-            if (Job.Points.Count == 0 && Job.FreezePointer)
+            if (!Job.MoveOnly && Job.Points.Count == 0 && Job.FreezePointer)
                 fixedPoint = NativeMethods.GetCursorPosition();
 
             var index = 0;
@@ -118,15 +122,22 @@ namespace AutoClick
                     return;
                 }
 
-                var target = fixedPoint;
-                if (Job.Points.Count > 0)
+                if (Job.MoveOnly)
                 {
-                    target = Job.Points[index];
-                    index = (index + 1) % Job.Points.Count;
+                    NativeMethods.Jiggle();
                 }
-                if (target.HasValue)
-                    NativeMethods.MoveCursor(target.Value);
-                NativeMethods.Click(Job.Button, Job.DoubleClick);
+                else
+                {
+                    var target = fixedPoint;
+                    if (Job.Points.Count > 0)
+                    {
+                        target = Job.Points[index];
+                        index = (index + 1) % Job.Points.Count;
+                    }
+                    if (target.HasValue)
+                        NativeMethods.MoveCursor(target.Value);
+                    NativeMethods.Click(Job.Button, Job.DoubleClick);
+                }
 
                 var clicks = Interlocked.Increment(ref _clicks);
                 if (Job.MaxClicks > 0 && clicks >= Job.MaxClicks)

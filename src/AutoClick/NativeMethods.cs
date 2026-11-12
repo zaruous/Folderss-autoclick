@@ -16,6 +16,7 @@ namespace AutoClick
         public const uint MOD_NOREPEAT = 0x4000;
 
         private const uint INPUT_MOUSE = 0;
+        private const uint MOUSEEVENTF_MOVE = 0x0001;
         private const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
         private const uint MOUSEEVENTF_LEFTUP = 0x0004;
         private const uint MOUSEEVENTF_RIGHTDOWN = 0x0008;
@@ -82,6 +83,24 @@ namespace AutoClick
         public static void MoveCursor(ScreenPoint point)
         {
             if (!SetCursorPos(point.X, point.Y))
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+        }
+
+        /// <summary>
+        /// 포인터를 오른쪽으로 1 움직였다가 되돌린다. SendInput으로 보내야 Windows의 유휴 시간이 초기화되어
+        /// 화면보호기·절전이 막힌다(SetCursorPos로 옮기는 것은 입력으로 치지 않는다).
+        /// 상대 이동이라 '포인터 정확도 향상'이 켜져 있거나 화면 오른쪽 끝이면 1픽셀쯤 어긋날 수 있다.
+        /// </summary>
+        public static void Jiggle()
+        {
+            var inputs = new INPUT[2];
+            for (var i = 0; i < inputs.Length; i++)
+            {
+                inputs[i].Type = INPUT_MOUSE;
+                inputs[i].Mouse.Flags = MOUSEEVENTF_MOVE;
+                inputs[i].Mouse.Dx = i == 0 ? 1 : -1;
+            }
+            if (SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>()) != inputs.Length)
                 throw new Win32Exception(Marshal.GetLastWin32Error());
         }
 
